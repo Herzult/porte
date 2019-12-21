@@ -1,0 +1,37 @@
+version: '3.1'
+services:
+  proxy:
+    build: .
+    command:
+      - proxy
+    environment:
+      PROXY_PORT: 8080
+      PROXY_GRAPH_URL: http://fakegraph:8888/graphql
+      # PROXY_GRAPH_URL: https://api.spacex.land/graphql
+      PROXY_PLAYGROUND: "true"
+      PROXY_DEBUG: "true"
+      PROXY_EXECLOG: "true"
+      PROXY_PROMETHEUS: "true"
+      PROXY_EXECLOG_AMQP_URL: ""
+    ports: 
+      - 8080:8080
+  
+  fakegraph:
+    build: .
+    command:
+      - fakegraph
+    environment:
+      FAKEGRAPH_PORT: 8888
+    ports: 
+      - 8888:8888
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./support/prometheus/config:/prometheus
+      - ./support/prometheus/data/prometheus:/data
+    command:
+      - '--config.file=/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data'
+    ports: 
+      - 9090:9090
